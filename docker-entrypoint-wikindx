@@ -21,7 +21,7 @@ fi
 # make sure a configuration file exists
 if [ ! -e /home/wikindx/config.php ]; then
   echo "no configuration file yet exist ..."
-  cp /var/www/html/config.php.dist /home/wikindx/config.php
+  cp /var/www/html/wikindx/config.php.dist /home/wikindx/config.php
   chown -R www-data.www-data /home/wikindx
   echo "created"
 fi
