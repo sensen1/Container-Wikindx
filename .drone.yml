@@ -1,6 +1,6 @@
 kind: pipeline
 type: kubernetes
-name: build-amd64
+name: build-fpm-amd64
 platform:
   arch: amd64
 node_selector:
@@ -28,7 +28,7 @@ steps:
 ---
 kind: pipeline
 type: kubernetes
-name: build-arm64
+name: build-fpm-arm64
 platform:
   arch: arm64
 node_selector:
@@ -56,7 +56,7 @@ steps:
 ---
 kind: pipeline
 type: kubernetes
-name: build-amd64
+name: build-nginx-amd64
 platform:
   arch: amd64
 node_selector:
@@ -84,7 +84,7 @@ steps:
 ---
 kind: pipeline
 type: kubernetes
-name: build-arm64
+name: build-nginx-arm64
 platform:
   arch: arm64
 node_selector:
@@ -148,8 +148,10 @@ steps:
       - buildah manifest rm wikindx:nginx-latest
 
 depends_on:
-  - build-amd64
-  - build-arm64
+  - build-fpm-amd64
+  - build-fpm-arm64
+  - build-nginx-amd64
+  - build-nginx-arm64
 
 ---
 kind: secret
