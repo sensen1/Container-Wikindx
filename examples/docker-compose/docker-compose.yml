@@ -1,0 +1,40 @@
+#
+# Example docker compose file for starting WIKINDX
+#
+# This compose file will not mount any volumes. You should know how to 
+# mount volumes for the maridadb image to keep you data over restarts.
+#
+# This is really only a very small example!!!!!!!
+# Do not run this code if you do not know anything about container security 
+# and system administration.
+#
+---
+version: "2.1"
+services:
+
+  dbwikindx:
+    restart: unless-stopped
+    image: mariadb:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: "dlksafhlasdhflkdsafhld!&53463472ZklHLFE"
+      MYSQL_DATABASE: wikindx
+      MYSQL_USER: wikindx
+      MYSQL_PASSWORD: "fhghtzrghglhjthgfg23!4"
+
+  fpmwikindx:
+    restart: unless-stopped
+    image: wikindx:fpm-latest
+    environment:
+      WIKINDX_DB_HOST: "dbwikindx"
+      WIKINDX_DB: "wikindx"
+      WIKINDX_DB_USER: "wikindx"
+      WIKINDX_DB_PASSWORD: "fhghtzrghglhjthgfg23!4"
+
+  nginxwikindx:
+    restart: unless-stopped
+    image: wikindx:nginx-latest
+    ports:
+      - "8080:8080"
+    environment:
+      WIKINDX_FPM_URL: "fpmwikindx:9000"
+

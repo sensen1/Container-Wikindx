@@ -1,0 +1,25 @@
+FROM alpine:latest  as builder 
+RUN apk update && apk add --no-cache bash ca-certificates
+
+RUN wget -O wikindx.tar.bz2 https://phoenixnap.dl.sourceforge.net/project/wikindx/6.7.2/wikindx_6.7.2.tar.bz2
+RUN tar jxf wikindx.tar.bz2
+
+FROM alpine:latest
+
+RUN apk update && apk add --no-cache bash ca-certificates tini nginx
+
+COPY --from=builder /wikindx /var/www/html/
+RUN chown -R nginx.nginx /var/www/html/
+
+ADD files/entryPoint.sh /entryPoint.sh
+RUN chmod a+x /entryPoint.sh
+
+ADD files/default.conf /etc/nginx/http.d/
+RUN sed -i '1idaemon off;' /etc/nginx/nginx.conf
+RUN chown -R nginx.nginx /etc/nginx 
+
+
+USER nginx
+
+
+ENTRYPOINT ["/sbin/tini", "--", "/entryPoint.sh"]

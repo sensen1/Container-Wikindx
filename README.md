@@ -1,45 +1,75 @@
-# docker-wikindx
+---
+lang: EN_US
+---
+
+# WIKINDX Container Image
+
+This repository holds the source code for two container images to run the 
+[WIKINDX](https://wikindx.sourceforge.io/) bibliographic management system.
 
 ## Description
 
-This repository contains everything required to build a docker image for
-run https://wikindx.sourceforge.io/ under docker.
+To run WIKINDX this repository devides the application into two containers.
+This is done to provide maximum performance and maximum security.
 
-The documentation and the Dockerfile are work in progress.
+### wikindx:fpm-latest
 
-The main git repository for this project is: https://gitea.federationhq.de/byterazor/docker-wikindx
+This container image executes all php scripts of the application using
+the php-fpm server. 
 
-### Restrictions
+PHP-FPM is listening on port 9000 within the container.
 
-At the moment only a mysql server within this container can be used.
-*No* support for external database server is available at the moment.
+### wikindx:nginx-latest
 
-Therefore, the local database is not exposed to the outside and runs
-on *unsecure* default credentials right now!
+This container image provides static HTML pages of the application and 
+uses a reverse proxy definition to request the output of the php scripts
+from the container running wikindy:fpm-latest.
 
-## Author
+Nginx is listening on port 8080 within the container. 
 
-- Dominik Meyer <dmeyer@federationhq.de>
+**At the moment no SSL/TLS support is provided within the container therefore
+you have to put something in front of this container to use SSL/TLS.**
+
+## Prerequisities
+
+A container runtime like
+
+* docker 
+* podman
+* kubernetes
+
+
+## Container Parameters
+
+### wikindx:fpm-latest
+
+Keep in mind, that WIKINDX only supports mysql or mariadb.
+
+* `WIKINDX_DB_HOST` - the host and port of the WIKINDX database server (e.g. localhost:3306)
+* `WIKINDX_DB` - the name of the dabase of the WIKINDX database
+* `WIKINDX_DB_USER` - the username to connect to the database server
+* `WIKINDX_DB_PASSWORD` - the password to connect to the database server 
+
+### wikindx:nginx-latest
+
+* `WIKINDX_FPM_URL` - the url to the PHP FPM server (e.g. localhost:9000)
+
+## Volumes
+
+At the moment no volumes can be mounted inside the containers.
+
+## Source Repository
+
+* https://gitea.federationhq.de/Container/wikindx.git
+
+## Usage Examples
+
+Under `examples` you can find examples on how to run this container images. 
+
+## Authors
+
+* **Dominik Meyer** - *Initial work* 
 
 ## License
 
-The Dockerfile and related files in this repository are licensed under
-the GPLv3.
-
-## Install
-
-### Docker hub
-
-- docker pull byterazor/wikindx:latest
-- docker run -p 8080:80 -v /tmp/data:/var/lib/mysql -v /tmp/wikindx:/var/www/html/wikindx
-
-Then connect to localhost:8080.
-
-### from repository
-
-- git clone https://gitea.federationhq.de/byterazor/docker-wikindx.git
-- cd docker-wikindx
-- docker build -t wikindx:latest .
-- docker run -p 8080:80 -v /tmp/data:/var/lib/mysql -v /tmp/wikindx:/var/www/html/wikindx
-
-Then connect to localhost:8080.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
