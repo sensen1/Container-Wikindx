@@ -1,0 +1,166 @@
+kind: pipeline
+type: kubernetes
+name: build-amd64
+platform:
+  arch: amd64
+node_selector:
+  kubernetes.io/arch: amd64
+
+volumes:
+- name: fedhq-ca-crt
+  config_map:
+    name: fedhq-ca-crt
+    default_mode: 420     # same as 644 in octal, or u+w,a+r
+    optional: false
+
+steps:
+  - name: build wikindx:fpm-latest on amd64
+    image: quay.io/buildah/stable
+    privileged: true
+    volumes:
+    - name: fedhq-ca-crt
+      path: /etc/ssl/certs2/
+    commands:
+      - scripts/setupEnvironment.sh
+      - cd fpm
+      - buildah bud --network host -t "registry.cloud.federationhq.de/wikindx:fpm-latest-amd64"  --arch amd64 .
+      - buildah push --all registry.cloud.federationhq.de/wikindx:fpm-latest-amd64
+---
+kind: pipeline
+type: kubernetes
+name: build-arm64
+platform:
+  arch: arm64
+node_selector:
+  kubernetes.io/arch: arm64
+
+volumes:
+- name: fedhq-ca-crt
+  config_map:
+    name: fedhq-ca-crt
+    default_mode: 420     # same as 644 in octal, or u+w,a+r
+    optional: false
+
+steps:
+  - name: build wikindx:fpm-latest on arm64
+    image: quay.io/buildah/stable
+    privileged: true
+    volumes:
+    - name: fedhq-ca-crt
+      path: /etc/ssl/certs2/
+    commands:
+      - scripts/setupEnvironment.sh
+      - cd fpm
+      - buildah bud --network host -t "registry.cloud.federationhq.de/wikindx:fpm-latest-arm64" --arch arm64 .
+      - buildah push --all registry.cloud.federationhq.de/wikindx:fpm-latest-arm64
+---
+kind: pipeline
+type: kubernetes
+name: build-amd64
+platform:
+  arch: amd64
+node_selector:
+  kubernetes.io/arch: amd64
+
+volumes:
+- name: fedhq-ca-crt
+  config_map:
+    name: fedhq-ca-crt
+    default_mode: 420     # same as 644 in octal, or u+w,a+r
+    optional: false
+
+steps:
+  - name: build wikindx:nginx-latest on amd64
+    image: quay.io/buildah/stable
+    privileged: true
+    volumes:
+    - name: fedhq-ca-crt
+      path: /etc/ssl/certs2/
+    commands:
+      - scripts/setupEnvironment.sh
+      - cd nginx
+      - buildah bud --network host -t "registry.cloud.federationhq.de/wikindx:nginx-latest-amd64"  --arch amd64 .
+      - buildah push --all registry.cloud.federationhq.de/wikindx:nginx-latest-amd64
+---
+kind: pipeline
+type: kubernetes
+name: build-arm64
+platform:
+  arch: arm64
+node_selector:
+  kubernetes.io/arch: arm64
+
+volumes:
+- name: fedhq-ca-crt
+  config_map:
+    name: fedhq-ca-crt
+    default_mode: 420     # same as 644 in octal, or u+w,a+r
+    optional: false
+
+steps:
+  - name: build wikindx:nginx-latest on arm64
+    image: quay.io/buildah/stable
+    privileged: true
+    volumes:
+    - name: fedhq-ca-crt
+      path: /etc/ssl/certs2/
+    commands:
+      - scripts/setupEnvironment.sh
+      - cd nginx
+      - buildah bud --network host -t "registry.cloud.federationhq.de/wikindx:nginx-latest-arm64" --arch arm64 .
+      - buildah push --all registry.cloud.federationhq.de/wikindx:nginx-latest-arm64
+---
+kind: pipeline
+type: kubernetes
+name: push
+node_selector:
+  kubernetes.io/arch: amd64
+       
+volumes:
+- name: fedhq-ca-crt
+  config_map:
+    name: fedhq-ca-crt
+    default_mode: 420     # same as 644 in octal, or u+w,a+r
+    optional: false
+
+steps:
+  - name: push
+    image: quay.io/buildah/stable
+    privileged: true
+    environment:
+      USERNAME:
+        from_secret: username
+      PASSWORD:
+        from_secret: password
+    volumes:
+    - name: fedhq-ca-crt
+      path: /etc/ssl/certs2/
+    commands:
+      - scripts/setupEnvironment.sh
+      - buildah manifest create wikindx:fpm-latest registry.cloud.federationhq.de/wikindx:fpm-latest-arm64 registry.cloud.federationhq.de/wikindx:fpm-latest-amd64
+      - buildah manifest push --all wikindx:fpm-latest docker://registry.cloud.federationhq.de/wikindx:fpm-latest
+      - buildah login -u $${USERNAME} -p $${PASSWORD} registry.hub.docker.com
+      - buildah manifest push --all wikindx:fpm-latest docker://registry.hub.docker.com/byterazor/wikindx:fpm-latest
+      - buildah manifest rm wikindx:fpm-latest
+      - buildah manifest create wikindx:nginx-latest registry.cloud.federationhq.de/wikindx:nginx-latest-arm64 registry.cloud.federationhq.de/wikindx:nginx-latest-amd64
+      - buildah manifest push --all wikindx:nginx-latest docker://registry.cloud.federationhq.de/wikindx:nginx-latest
+      - buildah manifest push --all wikindx:nginx-latest docker://registry.hub.docker.com/byterazor/wikindx:nginx-latest
+      - buildah manifest rm wikindx:nginx-latest
+
+depends_on:
+  - build-amd64
+  - build-arm64
+
+---
+kind: secret
+name: username
+get:
+  path: docker
+  name: username
+
+---
+kind: secret
+name: password
+get:
+  path: docker
+  name: secret
