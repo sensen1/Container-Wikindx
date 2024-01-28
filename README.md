@@ -62,6 +62,10 @@ At the moment no volumes can be mounted inside the containers.
 
 * https://gitea.federationhq.de/Container/wikindx.git
 
+## Prebuild Images
+
+* https://hub.docker.com/repository/docker/byterazor/wikindx/general
+
 ## Usage Examples
 
 Under `examples` you can find examples on how to run this container images. 
