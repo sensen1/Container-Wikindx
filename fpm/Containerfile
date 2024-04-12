@@ -2,7 +2,7 @@ FROM alpine:latest  as builder
 RUN apk update && apk add --no-cache bash ca-certificates
 
 RUN wget -O wikindx.tar.bz2 https://master.dl.sourceforge.net/project/wikindx/6.9.0/wikindx_6.9.0.tar.bz2
-RUN tar jxf wikindx.tar.bz2
+RUN mkdir wikindx; tar jxf wikindx.tar.bz2 -C wikindx  --strip-components 1
 
 FROM alpine:latest
 
