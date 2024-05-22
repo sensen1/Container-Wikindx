@@ -34,7 +34,7 @@ services:
     restart: unless-stopped
     image: wikindx:nginx-latest
     ports:
-      - "8080:8080"
+      - "5309:8080"
     environment:
       WIKINDX_FPM_URL: "fpmwikindx:9000"
 
