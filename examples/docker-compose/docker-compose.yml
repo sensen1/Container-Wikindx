@@ -23,7 +23,7 @@ services:
 
   fpmwikindx:
     restart: unless-stopped
-    image: wikindx:fpm-latest
+    image: byterazor/wikindx:fpm-latest
     environment:
       WIKINDX_DB_HOST: "dbwikindx"
       WIKINDX_DB: "wikindx"
@@ -32,7 +32,7 @@ services:
 
   nginxwikindx:
     restart: unless-stopped
-    image: wikindx:nginx-latest
+    image: byterazor/wikindx:nginx-latest
     ports:
       - "5309:8080"
     environment:
