@@ -24,6 +24,8 @@ services:
   fpmwikindx:
     restart: unless-stopped
     image: byterazor/wikindx:fpm-latest
+    ports:
+      - "5310:9000"
     environment:
       WIKINDX_DB_HOST: "dbwikindx"
       WIKINDX_DB: "wikindx"
